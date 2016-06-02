@@ -229,14 +229,14 @@ namespace casacore {
   {
   public:
     CallOnce0()
-#ifdef USE_THREADS
-# ifndef AIPS_CXX11 // pre-C++11
-    : itsFlag(PTHREAD_ONCE_INIT) // TODO: FIXME
-# endif
-#else
+#ifndef USE_THREADS
     : itsFlag(false)
 #endif
-    { }
+    {
+#if defined(USE_THREADS) && !defined(AIPS_CXX11) // pre-C++11
+      itsFlag = PTHREAD_ONCE_INIT; // member init fails on MacOS (struct)
+#endif
+    }
 
     void operator()(void (*fn)()) {
 #ifdef USE_THREADS
